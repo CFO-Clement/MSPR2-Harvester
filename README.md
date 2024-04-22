@@ -141,3 +141,6 @@ sudo systemctl status prometheus
 sudo journalctl -u prometheus
 ```
 interface prometheus sur `http://localhost:9090`
+
+#TODO
+Pour le moment, la remplate de config de prometheus es override car ca marche pas
