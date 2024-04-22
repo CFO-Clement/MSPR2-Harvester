@@ -69,18 +69,14 @@
         - /etc/prometheus/consoles
         - /etc/prometheus/console_libraries
 
-    - name: Copy Prometheus binaries and web UI
-      copy:
-        src: "{{ item }}"
-        dest: "{{ item }}"
-        owner: prometheus
-        group: prometheus
-        mode: '0755'
+    - name: Move Prometheus binaries and web UI
+      command: mv /path/to/extracted/prometheus-2.33.1.linux-amd64/{{ item.src }} {{ item.dest }}
+      become: yes
       with_items:
-        - /usr/local/bin/prometheus
-        - /usr/local/bin/promtool
-        - /etc/prometheus/consoles/
-        - /etc/prometheus/console_libraries/
+        - { src: 'prometheus', dest: '/usr/local/bin/prometheus' }
+        - { src: 'promtool', dest: '/usr/local/bin/promtool' }
+        - { src: 'consoles', dest: '/etc/prometheus/consoles/' }
+        - { src: 'console_libraries', dest: '/etc/prometheus/console_libraries/' }
 
     - name: Create Prometheus systemd service
       systemd:
