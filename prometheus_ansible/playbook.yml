@@ -41,7 +41,6 @@
       get_url:
         url: "https://github.com/prometheus/prometheus/releases/download/v2.33.1/prometheus-2.33.1.linux-amd64.tar.gz"
         dest: /tmp/prometheus.tar.gz
-      when: not ansible.builtin.stat(path='/tmp/prometheus.tar.gz').exists
 
     - name: Extract Prometheus to a temporary directory
       unarchive:
