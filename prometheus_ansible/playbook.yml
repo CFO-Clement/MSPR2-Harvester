@@ -69,16 +69,23 @@
         - /etc/prometheus/consoles
         - /etc/prometheus/console_libraries
 
-    - name: Create Prometheus systemd service
+    - name: Copy Prometheus systemd service file
+      copy:
+        src: files/prometheus.service
+        dest: /etc/systemd/system/prometheus.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd to recognize new Prometheus service
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Prometheus service
       systemd:
         name: prometheus
         enabled: yes
         state: started
-        daemon_reload: yes
-        enabled_boot: yes
-        unit_file_state: present
-        config:
-          ExecStart: "/usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries"
 
     - name: Restart Prometheus service
       service:
