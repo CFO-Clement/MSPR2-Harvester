@@ -20,6 +20,7 @@
         - /var/lib/prometheus
         - /etc/prometheus/consoles
         - /etc/prometheus/console_libraries
+        - /opt/prometheus_temp
 
     - name: Copy Prometheus configuration file
       copy:
