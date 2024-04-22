@@ -86,6 +86,7 @@ Une fois que TimescaleDB est installé, vous devez créer une base de données d
 1. **Connectez-vous à PostgreSQL** :
 
    ```bash
+   systemctl restart postgresql
    sudo -u postgres psql
    ```
 
@@ -97,7 +98,12 @@ Une fois que TimescaleDB est installé, vous devez créer une base de données d
 
 3. **Créez un utilisateur et attribuez-lui des privilèges sur la base de données** :
 
+  ```psql
+  \c prometheus_data
+  ```
+
    ```sql
+   CREATE EXTENSION IF NOT EXISTS timescaledb;
    CREATE USER prometheus_user WITH PASSWORD 'votre_mot_de_passe';
    GRANT ALL PRIVILEGES ON DATABASE prometheus_data TO prometheus_user;
    ```
@@ -117,7 +123,7 @@ remote_write:
   - url: "http://machine_b_ip:port/write"
 ```
 
-Assurez-vous de remplacer `"http://machine_b_ip:port/write"` par l'URL réelle de l'endpoint d'écriture distant de votre base de données TimescaleDB.
+Assurez-vous de remplacer `"http://prometheus_user:prometheus@192.168.1.218:5432/write""` par l'URL réelle de l'endpoint d'écriture distant de votre base de données TimescaleDB.
 
 #### Redémarrez Prometheus :
 
@@ -128,3 +134,10 @@ sudo systemctl restart prometheus
 ```
 
 Une fois cela fait, Prometheus commencera à écrire des données dans votre base de données TimescaleDB sur la machine B. Vous pouvez maintenant configurer Grafana sur la machine C pour visualiser ces données en utilisant TimescaleDB comme source de données.
+
+#### Pour verifier:
+```bash
+sudo systemctl status prometheus
+sudo journalctl -u prometheus
+```
+interface prometheus sur `http://localhost:9090`
