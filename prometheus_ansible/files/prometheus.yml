@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Exemple de configuration pour le node_exporter
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+
+remote_write:
+  - url: "{{ remote_write_endpoint }}"
+    # Autres options de configuration selon vos besoins

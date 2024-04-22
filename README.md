@@ -42,3 +42,13 @@ Harvester/
 │
 └── README.md
 ```
+Simplification -> On manque de temps pour faire ca bien ->
+## Clients Prometheus
+```
+prometheus_ansible/
+│
+├── files/
+│   └── prometheus.yml
+├── playbook.yml
+└── setup.sh
+```

@@ -1,0 +1,80 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Copy Prometheus configuration file
+      copy:
+        src: files/prometheus.yml
+        dest: /etc/prometheus/prometheus.yml
+        owner: prometheus
+        group: prometheus
+        mode: '0644'
+
+    - name: Install Prometheus dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - wget
+        - tar
+
+    - name: Download and extract Prometheus
+      get_url:
+        url: "https://github.com/prometheus/prometheus/releases/download/v2.33.1/prometheus-2.33.1.linux-amd64.tar.gz"
+        dest: /tmp/prometheus.tar.gz
+
+    - name: Extract Prometheus
+      unarchive:
+        src: /tmp/prometheus.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+
+    - name: Create Prometheus user
+      user:
+        name: prometheus
+        system: yes
+        shell: /bin/false
+
+    - name: Create Prometheus directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+      with_items:
+        - /etc/prometheus
+        - /var/lib/prometheus
+        - /etc/prometheus/consoles
+        - /etc/prometheus/console_libraries
+
+    - name: Copy Prometheus binaries and web UI
+      copy:
+        src: "{{ item }}"
+        dest: "{{ item }}"
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+      with_items:
+        - /usr/local/bin/prometheus
+        - /usr/local/bin/promtool
+        - /etc/prometheus/consoles/
+        - /etc/prometheus/console_libraries/
+
+    - name: Create Prometheus systemd service
+      systemd:
+        name: prometheus
+        enabled: yes
+        state: started
+        daemon_reload: yes
+        enabled_boot: yes
+        unit_file_state: present
+        config:
+          ExecStart: "/usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries"
+
+    - name: Restart Prometheus service
+      service:
+        name: prometheus
+        state: restarted
