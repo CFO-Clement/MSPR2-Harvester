@@ -8,14 +8,14 @@
         system: yes
         shell: /bin/false
 
-    - name: Create Prometheus directories
+    - name: Create required Prometheus directories
       file:
         path: "{{ item }}"
         state: directory
         owner: prometheus
         group: prometheus
         mode: '0755'
-      with_items:
+      loop:
         - /etc/prometheus
         - /var/lib/prometheus
         - /etc/prometheus/consoles
@@ -33,41 +33,37 @@
       apt:
         name: "{{ item }}"
         state: present
-      with_items:
+      loop:
         - wget
         - tar
 
-    - name: Download and extract Prometheus
+    - name: Download Prometheus tarball if not present
       get_url:
         url: "https://github.com/prometheus/prometheus/releases/download/v2.33.1/prometheus-2.33.1.linux-amd64.tar.gz"
         dest: /tmp/prometheus.tar.gz
+      when: not ansible.builtin.stat(path='/tmp/prometheus.tar.gz').exists
 
-    - name: Extract Prometheus
+    - name: Extract Prometheus to a temporary directory
       unarchive:
         src: /tmp/prometheus.tar.gz
-        dest: /usr/local/bin/
+        dest: /opt/prometheus_temp
         remote_src: yes
-        owner: prometheus
-        group: prometheus
-        mode: '0755'
+        creates: /opt/prometheus_temp/prometheus-2.33.1.linux-amd64
 
-    - name: Create Prometheus user
-      user:
-        name: prometheus
-        system: yes
-        shell: /bin/false
+    - name: Move Prometheus binaries to /usr/local/bin
+      command: mv /opt/prometheus_temp/prometheus-2.33.1.linux-amd64/prometheus /usr/local/bin/prometheus
+      args:
+        creates: /usr/local/bin/prometheus
 
-    - name: Create Prometheus directories
+    - name: Move Prometheus node exporter to /usr/local/bin
+      command: mv /opt/prometheus_temp/prometheus-2.33.1.linux-amd64/promtool /usr/local/bin/promtool
+      args:
+        creates: /usr/local/bin/promtool
+
+    - name: Clean up temporary Prometheus directory
       file:
-        path: "{{ item }}"
-        state: directory
-        owner: prometheus
-        group: prometheus
-      with_items:
-        - /etc/prometheus
-        - /var/lib/prometheus
-        - /etc/prometheus/consoles
-        - /etc/prometheus/console_libraries
+        path: /opt/prometheus_temp
+        state: absent
 
     - name: Copy Prometheus systemd service file
       copy:
@@ -86,8 +82,3 @@
         name: prometheus
         enabled: yes
         state: started
-
-    - name: Restart Prometheus service
-      service:
-        name: prometheus
-        state: restarted
