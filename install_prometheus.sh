@@ -14,4 +14,4 @@ read -p "Entrez l'URL de l'endpoint remote_write (laissez vide pour utiliser la 
 remote_write_endpoint=${remote_write_endpoint:-$DEFAULT_REMOTE_WRITE_ENDPOINT}
 
 # Exécuter le playbook Ansible avec l'URL de l'endpoint remote_write
-ansible-playbook -i localhost, -c local -e "remote_write_endpoint=$remote_write_endpoint" prometheus_ansible/playbook.yml
+ansible-playbook -i localhost, -c local -e "remote_write_endpoint=http://prometheus_user:prometheus@192.168.1.218:5432/write" prometheus_ansible/playbook.yml
