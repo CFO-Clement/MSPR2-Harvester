@@ -58,23 +58,20 @@ Pour installer TimescaleDB et le configurer pour fonctionner avec Prometheus, su
 
 Sur la machine B, vous pouvez installer TimescaleDB en suivant les instructions fournies dans leur documentation officielle. Voici comment vous pouvez procéder :
 
-1. **Ajouter le référentiel TimescaleDB** :
+1. **Installer TimescaleDB** :
 
    ```bash
-   sudo apt update
-   sudo apt install -y curl ca-certificates gnupg2
-   curl -sSL https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
-   echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
+   sudo su - 
+   apt update
+   apt install gnupg postgresql-common apt-transport-https lsb-release wget
+   /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+   echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
+   wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
+   apt update
+   apt install timescaledb-2-postgresql-14
    ```
 
-2. **Installer TimescaleDB** :
-
-   ```bash
-   sudo apt update
-   sudo apt install -y timescaledb-postgresql-14
-   ```
-
-3. **Initialiser TimescaleDB** :
+2. **Initialiser TimescaleDB** :
 
    Après l'installation, vous devez initialiser TimescaleDB sur votre cluster PostgreSQL. Vous pouvez le faire en exécutant la commande suivante :
 

@@ -2,6 +2,25 @@
 - hosts: localhost
   become: yes
   tasks:
+    - name: Create Prometheus user
+      user:
+        name: prometheus
+        system: yes
+        shell: /bin/false
+
+    - name: Create Prometheus directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+      with_items:
+        - /etc/prometheus
+        - /var/lib/prometheus
+        - /etc/prometheus/consoles
+        - /etc/prometheus/console_libraries
+
     - name: Copy Prometheus configuration file
       copy:
         src: files/prometheus.yml
