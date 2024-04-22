@@ -14,3 +14,31 @@
 
 3. **Implémentation de la télémaintenance avec Shellinabox** :
    - Installer Shellinabox (Client) sur le serveur où tourne le Nester.
+
+## Clients Prometheus
+```
+Harvester/
+│
+├── ansible/
+│   ├── roles/
+│   │   ├── prometheus/
+│   │   │   ├── tasks/
+│   │   │   │   ├── main.yml      # Tâches pour installer et configurer Prometheus
+│   │   │   ├── handlers/
+│   │   │   │   ├── main.yml      # Handlers pour redémarrer Prometheus après configuration
+│   │   │   ├── templates/
+│   │   │   │   ├── prometheus.yml.j2  # Template pour prometheus.yml
+│   │   │   ├── defaults/
+│   │   │   │   ├── main.yml      # Valeurs par défaut pour les variables
+│   │   │   ├── vars/
+│   │   │   │   ├── main.yml      # Variables spécifiques à l'environnement
+│   │   │   └── meta/
+│   │   │       └── main.yml      # Dépendances de rôle, si nécessaire
+│   │   └── clients/
+│   │       ├── tasks/
+│   │       │   ├── main.yml      # Tâches pour configurer les clients Prometheus
+│   ├── playbook.yml
+│   └── hosts                    # Inventaire Ansible
+│
+└── README.md
+```

@@ -1,0 +1,72 @@
+---
+- name: Installer les dépendances nécessaires
+  apt:
+    name:
+      - wget
+      - curl
+    update_cache: yes
+    state: present
+
+- name: Créer les répertoires pour Prometheus
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+- name: Télécharger Prometheus
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v2.40.0/prometheus-2.40.0.linux-amd64.tar.gz"
+    dest: "/tmp/prometheus.tar.gz"
+    mode: '0664'
+
+- name: Extraire Prometheus
+  unarchive:
+    src: "/tmp/prometheus.tar.gz"
+    dest: "/usr/local/src"
+    remote_src: yes
+    creates: "/usr/local/src/prometheus-2.40.0.linux-amd64"
+
+- name: Copier les binaires de Prometheus dans /usr/local/bin
+  copy:
+    src: "/usr/local/src/prometheus-2.40.0.linux-amd64/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    remote_src: yes
+    mode: '0755'
+  loop:
+    - prometheus
+    - promtool
+
+- name: Copier les consoles et les librairies de consoles
+  copy:
+    src: "/usr/local/src/prometheus-2.40.0.linux-amd64/consoles"
+    dest: "/etc/prometheus/consoles"
+    remote_src: yes
+  copy:
+    src: "/usr/local/src/prometheus-2.40.0.linux-amd64/console_libraries"
+    dest: "/etc/prometheus/console_libraries"
+    remote_src: yes
+
+- name: Déployer le fichier de configuration prometheus.yml
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
+
+- name: S'assurer que Prometheus est géré comme un service
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+    daemon_reload: yes
+    service:
+      ExecStart: /usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries
+      User: prometheus
+      Restart: always
+  notify: restart prometheus
+

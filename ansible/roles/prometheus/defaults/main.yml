@@ -1,0 +1,30 @@
+---
+# Version de Prometheus à installer
+prometheus_version: "2.40.0"
+
+# Utilisateur et groupe sous lequel Prometheus sera exécuté
+prometheus_user: "prometheus"
+prometheus_group: "prometheus"
+
+# Emplacements des fichiers et répertoires
+prometheus_home: "/usr/local/bin"
+prometheus_config_dir: "/etc/prometheus"
+prometheus_data_dir: "/var/lib/prometheus"
+prometheus_config_file: "{{ prometheus_config_dir }}/prometheus.yml"
+prometheus_rule_files_path: "{{ prometheus_config_dir }}/rules"
+prometheus_service_name: "prometheus"
+
+# Configuration de l'Alertmanager
+alertmanagers:
+  - "alertmanager:9093"
+
+# Hosts de nodes à surveiller (cette variable sera surchargée par l'inventaire Ansible)
+nodes:
+  - "node1"
+  - "node2"
+
+# Configuration personnalisée de scrape
+custom_scrape_configs: |
+  - job_name: 'additional_job'
+    static_configs:
+      - targets: ['additionalhost1:9100', 'additionalhost2:9100']

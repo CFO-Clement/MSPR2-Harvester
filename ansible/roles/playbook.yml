@@ -1,0 +1,18 @@
+---
+- name: Installer et configurer Prometheus sur les serveurs Debian
+  hosts: monitoring_servers  # Assurez-vous que cela correspond à votre groupe d'inventaire
+  become: true  # Utilise sudo pour obtenir les privilèges de superutilisateur
+  vars:
+    prometheus_version: "2.40.0"  # Exemple de surcharge de variable
+  roles:
+    - prometheus
+  tasks:
+    - name: Vérification de l'installation de Prometheus
+      command: prometheus --version
+      register: prometheus_version_output
+      changed_when: false
+      check_mode: false
+
+    - name: Afficher la version de Prometheus
+      debug:
+        msg: "Prometheus version installed: {{ prometheus_version_output.stdout }}"

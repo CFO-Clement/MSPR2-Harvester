@@ -1,0 +1,24 @@
+---
+# Chemins des archives de téléchargement pour Prometheus
+prometheus_download_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+
+# Configuration spécifique de l'environnement pour les scrape jobs
+environment_scrape_configs: |
+  - job_name: 'production-database'
+    static_configs:
+      - targets:
+        - 'dbserver1:9187'  # PostgreSQL exporter
+        - 'dbserver2:9187'
+    metrics_path: '/metrics'
+    scheme: 'http'
+
+# Configuration spécifique des alertes
+alert_rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
