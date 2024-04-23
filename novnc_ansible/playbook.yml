@@ -2,6 +2,16 @@
 - hosts: localhost
   become: yes
   tasks:
+    - name: Install Pip
+      apt:
+        name: python3-pip
+        state: latest
+
+    - name: Install pip pexpect
+      pip:
+        name: pexpect
+        state: latest
+
     - name: Install TightVNC Server
       apt:
         name: tightvncserver
