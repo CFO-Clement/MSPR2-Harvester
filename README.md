@@ -1,86 +1,91 @@
 # L'Harvester (Client)
 
-**Objectif** : Collecter des métriques de manière efficace et sécurisée depuis les machines clientes.
+**Objectif** : Collecter des métriques de manière efficace et sécurisée depuis les machines clientes et proposer une solution de télémaintenance.
 
-## Étapes de développement :
+## Collecte de données
 
-1. **Installation de Prometheus Node Exporter** :
-   - Installer Node Exporter sur chaque machine cliente.
-   - Configurer Node Exporter pour qu'il expose les métriques de la machine.
+Nous utilisons Prometheus, qui se sert de `node_exporter` pour collecter les métriques de base de la machine, et de `remote_write` pour centraliser les données de tous les harvesters dans une base de données TimeScaleDB/Postgres12.
 
-2. **Configuration de Prometheus pour la collecte des données** :
-   - Installer et configurer Prometheus sur un serveur central.
-   - Ajouter des configurations à Prometheus pour découvrir les clients et collecter les métriques via Node Exporter.
+### Structure de la collecte de données
 
-3. **Implémentation de la télémaintenance avec Shellinabox** :
-   - Installer Shellinabox (Client) sur le serveur où tourne le Nester.
-
-## Clients Prometheus
-```
-Harvester/
-│
-├── ansible/
-│   ├── roles/
-│   │   ├── prometheus/
-│   │   │   ├── tasks/
-│   │   │   │   ├── main.yml      # Tâches pour installer et configurer Prometheus
-│   │   │   ├── handlers/
-│   │   │   │   ├── main.yml      # Handlers pour redémarrer Prometheus après configuration
-│   │   │   ├── templates/
-│   │   │   │   ├── prometheus.yml.j2  # Template pour prometheus.yml
-│   │   │   ├── defaults/
-│   │   │   │   ├── main.yml      # Valeurs par défaut pour les variables
-│   │   │   ├── vars/
-│   │   │   │   ├── main.yml      # Variables spécifiques à l'environnement
-│   │   │   └── meta/
-│   │   │       └── main.yml      # Dépendances de rôle, si nécessaire
-│   │   └── clients/
-│   │       ├── tasks/
-│   │       │   ├── main.yml      # Tâches pour configurer les clients Prometheus
-│   ├── playbook.yml
-│   └── hosts                    # Inventaire Ansible
-│
-└── README.md
-```
-Simplification -> On manque de temps pour faire ca bien ->
-## Clients Prometheus
-```
+```plaintext
 prometheus_ansible/
 │
 ├── files/
-│   └── prometheus.yml
-├── playbook.yml
-└── setup.sh
+│   ├── prometheus.yml             # Fichier de configuration de Prometheus
+│   ├── prometheus.service         # Service systemd pour Prometheus
+│   └── node_exporter.service      # Service systemd pour node_exporter
+├── playbook.yml                   # Playbook Ansible
+└── install_prometheus.sh          # Script d'installation
 ```
 
-#### Configuration de `remote_write` dans Prometheus :
+#### `prometheus_ansible/files/prometheus.yml`
 
-Sur la machine A, modifiez votre fichier `prometheus.yml` pour inclure `remote_write` avec les détails de votre base de données TimescaleDB.
+##### Job Prometheus
+La configuration détaillée du job (exemple). La valeur `localhost:9090` permet de rendre accessible Prometheus localement via le loopback.
 
-```yaml
-remote_write:
-  - url: "http://posgres:password@192.168.122.20:9201/write"
+##### Job node_exporter
+Description du job (exemple). La valeur `localhost:9100` permet d'exposer les données collectées par l'exporter.
+
+##### remote_write
+L'URL pointe vers un agrégateur sur la machine SGBD qui va récupérer les appels API de Prometheus et les enregistrer dans la base de données.
+
+### `prometheus_ansible/files/node_exporter.service`
+Service systemd qui se lance après le réseau et exécute le binaire `/usr/local/bin/node_exporter` sous l'utilisateur `node_exporter`.
+
+### `prometheus_ansible/files/prometheus.service`
+Service systemd qui se lance après le réseau avec une politique de redémarrage en cas d'échec et qui exécute le binaire `/usr/local/bin/prometheus` sous l'utilisateur `prometheus` avec les arguments suivants :
+
+```plaintext
+  --config.file=/etc/prometheus/prometheus.yml
+  --storage.tsdb.path=/var/lib/prometheus/
+  --web.console.templates=/etc/prometheus/consoles
+  --web.console.libraries=/etc/prometheus/console_libraries
 ```
 
-Assurez-vous de remplacer `http://posgres:password@192.168.122.20:9201/write` par l'URL réelle de l'endpoint d'écriture distant de votre base de données TimescaleDB.
+### `prometheus_ansible/playbook.yml`
+Playbook Ansible qui installe et configure toutes les dépendances en se basant sur les ressources de `files/`, puis lance les services.
 
-#### Redémarrez Prometheus :
+### `install_prometheus.sh`
+Script qui installe Ansible si nécessaire, demande à l'utilisateur l'endpoint de l'agrégateur TimeScaleDB, puis lance le playbook avec les bons arguments.
 
-Après avoir modifié `prometheus.yml`, redémarrez le service Prometheus pour appliquer les modifications.
+## Télémaintenance
 
-```bash
-sudo systemctl restart prometheus
+Nous utilisons un serveur `tightvncserver` pour supporter des bureaux à distance, ainsi que le service `NoVNC` pour encapsuler les sessions VNC dans un websocket, permettant l'utilisation d'un client web pour se connecter à la machine.
+
+### Structure de la télémaintenance
+
+```plaintext
+novnc_ansible/
+│
+├── files/
+│   ├── novnc.service           # Daemon NoVNC
+│   ├── vncserver               # Script pour tightvncserver
+│   └── vncserver.service       # Service systemd pour notre binaire vncserver
+├── playbook.yml                # Playbook Ansible
+└── install_novnc.sh            # Script d'installation
 ```
 
-Une fois cela fait, Prometheus commencera à écrire des données dans votre base de données TimescaleDB sur la machine B. Vous pouvez maintenant configurer Grafana sur la machine C pour visualiser ces données en utilisant TimescaleDB comme source de données.
+### `novnc_ansible/files/novnc.service`
+Daemon qui s'exécute après le démarrage du réseau et lance le binaire `/opt/noVNC/utils/novnc_proxy` pour encapsuler les sessions VNC dans un websocket.
+Options :
+`--vnc localhost:5902` - Endpoint du serveur VNC
+`--listen 6082` - Port d'écoute pour les websockets
 
-#### Pour verifier:
-```bash
-sudo systemctl status prometheus
-sudo journalctl -u prometheus
-```
-interface prometheus sur `http://localhost:9090`
+### `novnc_ansible/files/vncserver`
+Script agissant comme un binaire facilitant la gestion du serveur tightvncserver à travers des daemons. Ce script utilise le display `:2`.
 
-#TODO
-Pour le moment, la remplate de config de prometheus es override car ca marche pas
-Variabilier le playbook prometheus (meme sur le job_name pour pouvoir identifier les nodes)
+### `novnc_ansible/files/vncserver.service`
+Daemon systemd qui se lance après le réseau et exécute le binaire personnalisé `/usr/local/bin/vncserver`.
+
+### `novnc_ansible/playbook.yml`
+Playbook Ansible qui installe et configure toutes les dépendances en se basant sur les ressources de `files/` puis lance les services.
+
+### `install_novnc.sh`
+Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons arguments.
+
+## TODO
+
+### Collecte de données :
+   - Permettre à Ansible de prendre en compte la variable de l'endpoint TimeScaleDB, qui est actuellement codée en dur.
+   - Variabiliser le nom de la node afin de pouvoir les identifier une fois agrégées.
