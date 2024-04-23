@@ -59,10 +59,10 @@ Sur la machine A, modifiez votre fichier `prometheus.yml` pour inclure `remote_w
 
 ```yaml
 remote_write:
-  - url: "http://machine_b_ip:port/write"
+  - url: "http://posgres:password@192.168.122.20:9201/write"
 ```
 
-Assurez-vous de remplacer `"http://prometheus_user:prometheus@192.168.1.218:5432/write""` par l'URL réelle de l'endpoint d'écriture distant de votre base de données TimescaleDB.
+Assurez-vous de remplacer `http://posgres:password@192.168.122.20:9201/write` par l'URL réelle de l'endpoint d'écriture distant de votre base de données TimescaleDB.
 
 #### Redémarrez Prometheus :
 

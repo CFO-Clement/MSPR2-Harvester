@@ -1,19 +1,24 @@
 TimescaleDB
 Pour installer TimescaleDB et le configurer pour fonctionner avec Prometheus, suivez ces étapes :
 
-Sur la machine B, vous pouvez installer TimescaleDB en suivant les instructions fournies dans leur documentation officielle. Voici comment vous pouvez procéder :
-
 1. **Installer TimescaleDB** :
 
    ```bash
-   sudo su - 
+   sudo su -
+
    apt update
+
    apt install gnupg postgresql-common apt-transport-https lsb-release wget
+
    /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+
    echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
+
    wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
+
    apt update
-   apt install timescaledb-2-postgresql-14
+
+   apt install timescaledb-2-postgresql-12
    ```
 
 2. **Initialiser TimescaleDB** :
@@ -21,7 +26,7 @@ Sur la machine B, vous pouvez installer TimescaleDB en suivant les instructions 
    Après l'installation, vous devez initialiser TimescaleDB sur votre cluster PostgreSQL. Vous pouvez le faire en exécutant la commande suivante :
 
    ```bash
-   sudo timescaledb-tune
+   sudo timescaledb-tune --quiet --yes
    ```
 
 #### Configurer TimescaleDB pour Prometheus :
@@ -42,15 +47,15 @@ Une fois que TimescaleDB est installé, vous devez créer une base de données d
    ```
 
 3. **Créez un utilisateur et attribuez-lui des privilèges sur la base de données** :
+mettre password en mdp pour postgres
 
   ```psql
+  \password postgres 
   \c prometheus_data
   ```
 
    ```sql
    CREATE EXTENSION IF NOT EXISTS timescaledb;
-   CREATE USER prometheus_user WITH PASSWORD 'votre_mot_de_passe';
-   GRANT ALL PRIVILEGES ON DATABASE prometheus_data TO prometheus_user;
    ```
 
 4. **Sortez de PostgreSQL** :
@@ -64,7 +69,7 @@ Pour configurer PostgreSQL afin qu'il accepte les connexions de n'importe quelle
 1. **Ouvrez le fichier `pg_hba.conf`** :
    - Utilisez un éditeur de texte pour ouvrir le fichier. Sous Debian, vous pouvez utiliser `nano` ou `vim`. Par exemple :
      ```bash
-     sudo nano /etc/postgresql/14/main/pg_hba.conf
+     sudo vim /etc/postgresql/12/main/pg_hba.conf
      ```
 
 2. **Ajouter une règle d'accès** :
@@ -77,7 +82,7 @@ Pour configurer PostgreSQL afin qu'il accepte les connexions de n'importe quelle
 3. **Configurer PostgreSQL pour écouter sur toutes les interfaces** :
    - Assurez-vous également que PostgreSQL est configuré pour écouter sur toutes les interfaces réseau. Pour cela, modifiez le fichier `postgresql.conf` :
      ```bash
-     sudo nano /etc/postgresql/14/main/postgresql.conf
+     sudo vim /etc/postgresql/12/main/postgresql.conf
      ```
    - Trouvez la ligne `listen_addresses` et changez-la pour :
      ```
@@ -91,7 +96,36 @@ Pour configurer PostgreSQL afin qu'il accepte les connexions de n'importe quelle
      sudo systemctl restart postgresql
      ```
 
-5. **Vérifier la connectivité** :
-   - Testez la connexion depuis la machine B pour vous assurer que les modifications ont été appliquées correctement.
+### Instalation de l' adaptateur
+```bash
+export PATH="/usr/lib/postgresql/12/bin:$PATH"
 
-Ces étapes devraient permettre à n'importe quelle machine capable de pinguer la machine A de se connecter à PostgreSQL, à condition qu'ils aient les bons identifiants et que le réseau permette la connexion au port PostgreSQL (par défaut, 5432). Assurez-vous que votre pare-feu (si activé) autorise également les connexions sur ce port.
+sudo apt install make libpq-dev build-essential postgresql-server-dev-12
+
+git clone https://github.com/timescale/pg_prometheus
+
+cd pg_prometheus
+
+make
+
+make install
+```
+
+puis dans le fichier /etc/postgresql/12/main/postgresql.conf -> `shared_preload_libraries = 'timescaledb,pg_prometheus'`
+
+`systemctl restart posgresql`
+
+Puis il faut cree la table:
+`sudo -u postgres psql`
+```psql
+\c prometheus_data
+CREATE EXTENSION pg_prometheus;
+SELECT create_prometheus_table('metrics');
+```
+
+```bash
+wget https://github.com/timescale/prometheus-postgresql-adapter/releases/download/v0.6.0/prometheus-postgresql-adapter-0.6.0-linux-amd64.tar.gz
+tar -xf prometheus-postgresql-adapter-0.6.0-linux-amd64.tar.gz
+
+./prometheus-postgresql-adapter -pg-host=localhost -pg-port=5432 -pg-user=postgres -pg-password=password -pg-database=prometheus_data -web-listen-address=:9201
+```
