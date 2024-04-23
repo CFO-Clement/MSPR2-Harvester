@@ -83,3 +83,4 @@ interface prometheus sur `http://localhost:9090`
 
 #TODO
 Pour le moment, la remplate de config de prometheus es override car ca marche pas
+Variabilier le playbook prometheus (meme sur le job_name pour pouvoir identifier les nodes)

@@ -8,7 +8,7 @@ then
     sudo apt install -y ansible
 fi
 
-DEFAULT_REMOTE_WRITE_ENDPOINT="http://prometheus_user:prometheus@192.168.1.218:5432/write"
+DEFAULT_REMOTE_WRITE_ENDPOINT="http://posgres:password@192.168.122.20:9201/write"
 # Demander à l'utilisateur l'URL de l'endpoint remote_write
 read -p "Entrez l'URL de l'endpoint remote_write (laissez vide pour utiliser la valeur par défaut -> ${DEFAULT_REMOTE_WRITE_ENDPOINT}) :  " remote_write_endpoint
 remote_write_endpoint=${remote_write_endpoint:-$DEFAULT_REMOTE_WRITE_ENDPOINT}

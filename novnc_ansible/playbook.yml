@@ -1,0 +1,48 @@
+---
+- name: Setup VNC and noVNC environment on nodes
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install TightVNC Server
+      apt:
+        name: tightvncserver
+        state: latest
+
+    - name: Set VNC password
+      expect:
+        command: tightvncpasswd
+        responses:
+          Password: "{{ vnc_password }}"
+          Verify: "{{ vnc_password }}"
+        echo: no
+      vars:
+        vnc_password: "password"
+
+    - name: Install Websockify
+      apt:
+        name: websockify
+        state: latest
+
+    - name: Copy Websockify systemd service file
+      copy:
+        src: files/websockify.service
+        dest: /etc/systemd/system/websockify.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd to recognize new Prometheus service
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Websockify service
+      systemd:
+        name: websockify
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart websockify
+      systemd:
+        name: websockify
+        state: restarted

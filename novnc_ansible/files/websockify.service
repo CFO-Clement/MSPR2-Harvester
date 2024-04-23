@@ -1,0 +1,11 @@
+[Unit]
+Description=Websockify for noVNC
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/websockify 6080 localhost:5901
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
