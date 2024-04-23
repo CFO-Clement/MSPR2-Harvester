@@ -39,9 +39,3 @@
         name: websockify
         enabled: yes
         state: started
-
-  handlers:
-    - name: restart websockify
-      systemd:
-        name: websockify
-        state: restarted
