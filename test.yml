@@ -1,0 +1,68 @@
+---
+- name: Configurer et démarrer le serveur VNC sur Debian 11 avec GNOME
+  hosts: all
+  become: yes
+  tasks:
+    - name: Installation des paquets nécessaires pour VNC et GNOME
+      apt:
+        name:
+          - gnome-core
+          - task-gnome-desktop
+          - tightvncserver
+          - xfonts-base
+        state: present
+        update_cache: yes
+
+    - name: Définition du mot de passe VNC
+      expect:
+        command: "tightvncserver :1"
+        responses:
+          (?i)password: "votre_mot_de_passe"
+          (?i)verify: "votre_mot_de_passe"
+      no_log: true
+      become_user: "{{ ansible_env.USER }}"
+
+    - name: Configuration du démarrage automatique du serveur VNC
+      blockinfile:
+        path: "/home/{{ ansible_env.USER }}/.vnc/xstartup"
+        create: yes
+        block: |
+          #!/bin/bash
+          xrdb $HOME/.Xresources
+          startxfce4 &
+
+    - name: Assurer que le script xstartup est exécutable
+      file:
+        path: "/home/{{ ansible_env.USER }}/.vnc/xstartup"
+        mode: 0755
+
+    - name: Démarrage du serveur VNC
+      command: "tightvncserver :1"
+      become_user: "{{ ansible_env.USER }}"
+
+    - name: Installation et configuration d'un service systemd pour VNC
+      blockinfile:
+        path: "/etc/systemd/system/vncserver@.service"
+        create: yes
+        block: |
+          [Unit]
+          Description=Start TightVNC server at startup
+          After=syslog.target network.target
+
+          [Service]
+          Type=forking
+          User={{ ansible_env.USER }}
+          PAMName=login
+          PIDFile=/home/{{ ansible_env.USER }}/.vnc/%H:%i.pid
+          ExecStartPre=-/usr/bin/vncserver -kill :%i > /dev/null 2>&1
+          ExecStart=/usr/bin/vncserver -depth 24 -geometry 1280x800 :%i
+          ExecStop=/usr/bin/vncserver -kill :%i
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Activer et démarrer le service VNC
+      systemd:
+        name: vncserver@1
+        enabled: yes
+        state: started
