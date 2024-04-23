@@ -19,7 +19,7 @@
 
     - name: Définition du mot de passe VNC
       expect:
-        command: "tightvncserver :1"
+        command: "tightvncserver :2"
         responses:
           (?i)password: "votre_mot_de_passe"
           (?i)verify: "votre_mot_de_passe"
@@ -41,7 +41,7 @@
         mode: 0755
 
     - name: Démarrage du serveur VNC
-      command: "tightvncserver :1"
+      command: "tightvncserver :2"
       become_user: "{{ ansible_env.USER }}"
 
     - name: Installation et configuration d'un service systemd pour VNC
@@ -67,6 +67,6 @@
 
     - name: Activer et démarrer le service VNC
       systemd:
-        name: vncserver@1
+        name: vncserver@2
         enabled: yes
         state: started
