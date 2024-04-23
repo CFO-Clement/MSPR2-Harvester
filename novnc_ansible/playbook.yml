@@ -21,11 +21,14 @@
       expect:
         command: tightvncpasswd
         responses:
-          Password: "{{ vnc_password }}"
-          Verify: "{{ vnc_password }}"
+          (?i)password: "{{ vnc_password }}"
+          (?i)verify: "{{ vnc_password }}"
+          (?i)Would you like to enter a view-only password \(y/n\)\? "n"
         echo: no
       vars:
         vnc_password: "password"
+      no_log: true
+
 
     - name: Install Websockify
       apt:
