@@ -42,7 +42,7 @@
 
     - name: Configure VNC xstartup script
       copy:
-        src: /files/gnome_vnc_xstartup.sh
+        src: files/gnome_vnc_xstartup.sh
         dest: ~/.vnc/xstartup
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_gid }}"
