@@ -11,6 +11,7 @@
           - xfonts-base
         state: present
         update_cache: yes
+
     - name: Install pip pexpect
       pip:
         name: pexpect
