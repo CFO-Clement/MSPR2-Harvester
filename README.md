@@ -53,67 +53,6 @@ prometheus_ansible/
 └── setup.sh
 ```
 
-### TimescaleDB
-Pour installer TimescaleDB et le configurer pour fonctionner avec Prometheus, suivez ces étapes :
-
-Sur la machine B, vous pouvez installer TimescaleDB en suivant les instructions fournies dans leur documentation officielle. Voici comment vous pouvez procéder :
-
-1. **Installer TimescaleDB** :
-
-   ```bash
-   sudo su - 
-   apt update
-   apt install gnupg postgresql-common apt-transport-https lsb-release wget
-   /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-   echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
-   wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
-   apt update
-   apt install timescaledb-2-postgresql-14
-   ```
-
-2. **Initialiser TimescaleDB** :
-
-   Après l'installation, vous devez initialiser TimescaleDB sur votre cluster PostgreSQL. Vous pouvez le faire en exécutant la commande suivante :
-
-   ```bash
-   sudo timescaledb-tune
-   ```
-
-#### Configurer TimescaleDB pour Prometheus :
-
-Une fois que TimescaleDB est installé, vous devez créer une base de données dans laquelle Prometheus peut écrire ses données. Voici comment vous pouvez procéder :
-
-1. **Connectez-vous à PostgreSQL** :
-
-   ```bash
-   systemctl restart postgresql
-   sudo -u postgres psql
-   ```
-
-2. **Créez une base de données** :
-
-   ```sql
-   CREATE DATABASE prometheus_data;
-   ```
-
-3. **Créez un utilisateur et attribuez-lui des privilèges sur la base de données** :
-
-  ```psql
-  \c prometheus_data
-  ```
-
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS timescaledb;
-   CREATE USER prometheus_user WITH PASSWORD 'votre_mot_de_passe';
-   GRANT ALL PRIVILEGES ON DATABASE prometheus_data TO prometheus_user;
-   ```
-
-4. **Sortez de PostgreSQL** :
-
-   ```sql
-   \q
-   ```
-
 #### Configuration de `remote_write` dans Prometheus :
 
 Sur la machine A, modifiez votre fichier `prometheus.yml` pour inclure `remote_write` avec les détails de votre base de données TimescaleDB.
