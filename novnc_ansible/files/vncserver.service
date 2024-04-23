@@ -1,0 +1,12 @@
+[Unit]
+Description=TightVNC Service Unit
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/vncserver start
+ExecStop=/usr/local/bin/vncserver stop
+ExecReload=/usr/local/bin/vncserver restart
+User=root
+
+[Install]
+WantedBy=multi-user.target

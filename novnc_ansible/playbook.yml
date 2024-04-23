@@ -1,9 +1,6 @@
 ---
 - hosts: localhost
   become: yes
-  vars:
-    vnc_password: "password"  # Remplacez par un mot de passe sécurisé
-
   tasks:
     - name: Install necessary packages
       apt:
@@ -12,57 +9,45 @@
       loop:
         - python3-pip
         - tightvncserver
-        - websockify
-        - gnome-core  # Assurez-vous que GNOME est installé
 
     - name: Install pip pexpect
       pip:
         name: pexpect
         state: latest
-
-    - name: Set VNC password
+  
+    - name: Setup initial VNC server to set password
       expect:
-        command: tightvncpasswd
+        command: tightvncserver :2
         responses:
-          (?i)password: "{{ vnc_password }}"
-          (?i)verify: "{{ vnc_password }}"
-          (?i)Would you like to enter a view-only password \(y/n\)\?: "n"
-        echo: no
-      no_log: true
+          Password: "password"
+          Verify: "password"
+          "Would you like to enter a view-only password (y/n)?": "n"
+      ignore_errors: yes
 
-    - name: Ensure VNC directories exist
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_gid }}"
-        mode: '0755'
-      loop:
-        - ~/.vnc
+    - name: Kill any existing VNC server sessions
+      shell: tightvncserver -kill :2
+      ignore_errors: yes
 
-    - name: Configure VNC xstartup script
+    - name: Copy VNC server script from local directory
       copy:
-        src: files/gnome_vnc_xstartup.sh
-        dest: ~/.vnc/xstartup
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_gid }}"
+        src: files/vncserver
+        dest: /usr/local/bin/vncserver
+        owner: root
+        group: root
         mode: '0755'
 
-    - name: Copy TightVNC systemd service file from local directory
+     - name: Copy VNC systemd service file from local directory
       copy:
-        src: files/tightvnc.service
-        dest: /etc/systemd/system/tightvnc.service
+        src: files/vncserver.service
+        dest: /etc/systemd/system/vncserver.service
         owner: root
         group: root
         mode: '0644'
 
-    - name: Reload systemd to recognize new TightVNC service
+    - name: Reload systemd daemon and enable & start VNC service
       systemd:
         daemon_reload: yes
-
-    - name: Enable and start TightVNC service
-      systemd:
-        name: tightvnc
+        name: vncserver.service
         enabled: yes
         state: started
 
