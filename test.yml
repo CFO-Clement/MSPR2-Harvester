@@ -4,12 +4,17 @@
     - name: Installation des paquets nécessaires pour VNC et GNOME
       apt:
         name:
+          - python3-pip
           - gnome-core
           - task-gnome-desktop
           - tightvncserver
           - xfonts-base
         state: present
         update_cache: yes
+    - name: Install pip pexpect
+      pip:
+        name: pexpect
+        state: latest
 
     - name: Définition du mot de passe VNC
       expect:
