@@ -1,6 +1,5 @@
----
-- name: Setup VNC and noVNC environment on nodes
-  hosts: localhost
+
+- hosts: localhost
   become: yes
   tasks:
     - name: Install TightVNC Server
