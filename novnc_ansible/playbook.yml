@@ -36,7 +36,7 @@
         group: root
         mode: '0755'
 
-     - name: Copy VNC systemd service file from local directory
+    - name: Copy VNC systemd service file from local directory
       copy:
         src: files/vncserver.service
         dest: /etc/systemd/system/vncserver.service
