@@ -8,11 +8,9 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Exemple de configuration pour le node_exporter
   - job_name: 'node_exporter'
     static_configs:
       - targets: ['localhost:9100']
 
 remote_write:
-  - url: "http://prometheus_user:prometheus@192.168.1.218:5432/write"
-    # Autres options de configuration selon vos besoins
+  - url: "http://prometheus_user:prometheus@192.168.122.136:5432/write"
