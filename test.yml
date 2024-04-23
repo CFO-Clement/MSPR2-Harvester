@@ -1,4 +1,4 @@
----
+sudo a---
 - name: Configurer et démarrer le serveur VNC sur Debian 11 avec GNOME
   hosts: all
   become: yes
