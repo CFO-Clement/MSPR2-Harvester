@@ -50,7 +50,7 @@
 
     - name: Copy TightVNC systemd service file from local directory
       copy:
-        src: /files/tightvnc.service
+        src: files/tightvnc.service
         dest: /etc/systemd/system/tightvnc.service
         owner: root
         group: root
@@ -75,7 +75,7 @@
 
     - name: Copy noVNC systemd service file from local directory
       copy:
-        src: /files/novnc.service
+        src: files/novnc.service
         dest: /etc/systemd/system/novnc.service
         owner: root
         group: root
