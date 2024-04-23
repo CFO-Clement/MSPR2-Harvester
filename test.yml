@@ -25,6 +25,10 @@
           (?i)verify: "votre_mot_de_passe"
       no_log: false
       become_user: "{{ ansible_env.USER }}"
+    
+    - name: kill le serveur VNC
+      command: "tightvncserver -kill :2"
+      become_user: "{{ ansible_env.USER }}"
 
     - name: Configuration du démarrage automatique du serveur VNC
       blockinfile:
@@ -39,10 +43,6 @@
       file:
         path: "/home/{{ ansible_env.USER }}/.vnc/xstartup"
         mode: 0755
-
-    - name: Démarrage du serveur VNC
-      command: "tightvncserver :2"
-      become_user: "{{ ansible_env.USER }}"
 
     - name: Installation et configuration d'un service systemd pour VNC
       blockinfile:
