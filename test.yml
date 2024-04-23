@@ -17,7 +17,7 @@
         responses:
           (?i)password: "votre_mot_de_passe"
           (?i)verify: "votre_mot_de_passe"
-      no_log: true
+      no_log: false
       become_user: "{{ ansible_env.USER }}"
 
     - name: Configuration du démarrage automatique du serveur VNC
