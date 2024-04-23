@@ -14,7 +14,7 @@
       pip:
         name: pexpect
         state: latest
-  
+
     - name: Setup initial VNC server to set password
       expect:
         command: tightvncserver :2
