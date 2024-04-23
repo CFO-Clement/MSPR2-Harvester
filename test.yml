@@ -3,11 +3,19 @@
   hosts: all
   become: yes
   tasks:
-    - name: Install tightvncserver
+    - name: Install necessary packages
       apt:
-        name: tightvncserver
-        state: present
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - python3-pip
+        - tightvncserver
 
+    - name: Install pip pexpect
+      pip:
+        name: pexpect
+        state: latest
+  
     - name: Setup initial VNC server to set password
       expect:
         command: tightvncserver :2
