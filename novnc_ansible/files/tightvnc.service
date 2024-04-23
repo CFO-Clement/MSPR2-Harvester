@@ -1,0 +1,11 @@
+[Unit]
+Description=TightVNC server
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/tightvncserver :2 -geometry 1280x720 -depth 24
+ExecStop=/usr/bin/tightvncserver -kill :2
+
+[Install]
+WantedBy=multi-user.target

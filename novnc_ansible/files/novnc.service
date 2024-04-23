@@ -1,0 +1,12 @@
+[Unit]
+Description=noVNC Web Access Console
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash /opt/noVNC/utils/novnc_proxy --vnc localhost:5902 --listen 6082
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

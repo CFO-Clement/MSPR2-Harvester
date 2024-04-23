@@ -1,20 +1,23 @@
 ---
 - hosts: localhost
   become: yes
+  vars:
+    vnc_password: "password"  # Remplacez par un mot de passe sécurisé
+
   tasks:
-    - name: Install Pip
+    - name: Install necessary packages
       apt:
-        name: python3-pip
+        name: "{{ item }}"
         state: latest
+      loop:
+        - python3-pip
+        - tightvncserver
+        - websockify
+        - gnome-core  # Assurez-vous que GNOME est installé
 
     - name: Install pip pexpect
       pip:
         name: pexpect
-        state: latest
-
-    - name: Install TightVNC Server
-      apt:
-        name: tightvncserver
         state: latest
 
     - name: Set VNC password
@@ -25,30 +28,65 @@
           (?i)verify: "{{ vnc_password }}"
           (?i)Would you like to enter a view-only password \(y/n\)\?: "n"
         echo: no
-      vars:
-        vnc_password: "password"
       no_log: true
 
+    - name: Ensure VNC directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid }}"
+        mode: '0755'
+      loop:
+        - ~/.vnc
 
-    - name: Install Websockify
-      apt:
-        name: websockify
-        state: latest
-
-    - name: Copy Websockify systemd service file
+    - name: Configure VNC xstartup script
       copy:
-        src: files/websockify.service
-        dest: /etc/systemd/system/websockify.service
+        src: /files/gnome_vnc_xstartup.sh
+        dest: ~/.vnc/xstartup
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid }}"
+        mode: '0755'
+
+    - name: Copy TightVNC systemd service file from local directory
+      copy:
+        src: /files/tightvnc.service
+        dest: /etc/systemd/system/tightvnc.service
         owner: root
         group: root
         mode: '0644'
 
-    - name: Reload systemd to recognize new Prometheus service
+    - name: Reload systemd to recognize new TightVNC service
       systemd:
         daemon_reload: yes
 
-    - name: Enable and start Websockify service
+    - name: Enable and start TightVNC service
       systemd:
-        name: websockify
+        name: tightvnc
+        enabled: yes
+        state: started
+
+    - name: Clone noVNC repository
+      git:
+        repo: 'https://github.com/novnc/noVNC.git'
+        dest: /opt/noVNC
+        clone: yes
+        update: yes
+
+    - name: Copy noVNC systemd service file from local directory
+      copy:
+        src: /files/novnc.service
+        dest: /etc/systemd/system/novnc.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd to recognize new noVNC service
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start noVNC service
+      systemd:
+        name: novnc
         enabled: yes
         state: started
