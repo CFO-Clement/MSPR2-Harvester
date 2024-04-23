@@ -87,7 +87,6 @@
       get_url:
         url: "https://github.com/prometheus/node_exporter/releases/download/v1.3.1/node_exporter-1.3.1.linux-amd64.tar.gz"
         dest: /tmp/node_exporter.tar.gz
-        checksum: "sha256:3db473365b601a1495e0676dbb7caab7d8e1b447584282f68e8e6a1391fe4ac8"
 
     - name: Extract Node Exporter
       unarchive:
