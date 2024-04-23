@@ -23,7 +23,7 @@
         responses:
           (?i)password: "{{ vnc_password }}"
           (?i)verify: "{{ vnc_password }}"
-          (?i)Would you like to enter a view-only password \(y/n\)\? "n"
+          (?i)Would you like to enter a view-only password \(y/n\)\?: "n"
         echo: no
       vars:
         vnc_password: "password"
