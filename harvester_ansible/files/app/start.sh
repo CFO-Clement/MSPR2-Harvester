@@ -7,7 +7,7 @@ start_compose() {
 
 start_docker() {
     echo "Démarrage des conteneurs avec Docker..."
-    sudo docker run -d --name harverster harverster_image
+    sudo docker run --name harverster harverster_image
 }
 
 if [ "$#" -gt 0 ]; then
