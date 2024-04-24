@@ -1,7 +1,3 @@
-Voici une mise à jour de votre README pour inclure les informations sur la configuration et l'installation de ShellInABox ainsi qu'un résumé des services et des ports utilisés pour faciliter la maintenance et la surveillance de vos systèmes.
-
----
-
 # L'Harvester (Client)
 
 **Objectif** : Collecter des métriques de manière efficace et sécurisée depuis les machines clientes et proposer une solution de télémaintenance.
@@ -100,8 +96,9 @@ Nous avons également intégré ShellInABox pour permettre un accès terminal s�
 shellinabox_ansible/
 │
 ├── files/
-│   └── shellinabox               # Fichier de configuration de ShellInABox
-├── playbook.yml                  # Playbook Ansible
+│   └── shellinabox                   # Fichier de configuration de ShellInABox
+├── playbook.yml                      # Playbook Ansible
+└── install_shellinabox.sh            # Script d'installation
 ```
 
 #### `shellinabox_ansible/files/shellinabox`
@@ -110,7 +107,10 @@ Configuration de ShellInABox pour démarrer avec le système et écouter sur le 
 #### `shellinabox_ansible/playbook.yml`
 Playbook Ansible qui prépare le serveur SSH et installe ShellInABox, assure le démarrage du service et configure le firewall pour permettre le trafic sur le port 6175.
 
-### Résumé des Services et Ports
+### `install_shellinabox.sh`
+Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons arguments.
+
+## Résumé des Services et Ports
 
 - **Prometheus** : Port 9090
 - **Node Exporter** : Port 9100
