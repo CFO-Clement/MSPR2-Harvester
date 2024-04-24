@@ -1,3 +1,7 @@
+Voici une mise à jour de votre README pour inclure les informations sur la configuration et l'installation de ShellInABox ainsi qu'un résumé des services et des ports utilisés pour faciliter la maintenance et la surveillance de vos systèmes.
+
+---
+
 # L'Harvester (Client)
 
 **Objectif** : Collecter des métriques de manière efficace et sécurisée depuis les machines clientes et proposer une solution de télémaintenance.
@@ -49,7 +53,7 @@ Playbook Ansible qui installe et configure toutes les dépendances en se basant 
 ### `install_prometheus.sh`
 Script qui installe Ansible si nécessaire, demande à l'utilisateur l'endpoint de l'agrégateur TimeScaleDB, puis lance le playbook avec les bons arguments.
 
-## Télémaintenance
+## Télémaintenance -- VNC
 
 Nous utilisons un serveur `tightvncserver` pour supporter des bureaux à distance, ainsi que le service `NoVNC` pour encapsuler les sessions VNC dans un websocket, permettant l'utilisation d'un client web pour se connecter à la machine.
 
@@ -84,44 +88,40 @@ Playbook Ansible qui installe et configure toutes les dépendances en se basant 
 ### `install_novnc.sh`
 Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons arguments.
 
+
+
+## ## Télémaintenance -- SSH
+
+Nous avons également intégré ShellInABox pour permettre un accès terminal sécurisé via le navigateur. Ce service est installé et configuré sur chaque machine pour fournir un accès direct au terminal à travers une interface web sécurisée.
+
+### Playbook Ansible pour ShellInABox
+
+```plaintext
+shellinabox_ansible/
+│
+├── files/
+│   └── shellinabox               # Fichier de configuration de ShellInABox
+├── playbook.yml                  # Playbook Ansible
+```
+
+#### `shellinabox_ansible/files/shellinabox`
+Configuration de ShellInABox pour démarrer avec le système et écouter sur le port 6175. La connexion est sécurisée via HTTPS.
+
+#### `shellinabox_ansible/playbook.yml`
+Playbook Ansible qui prépare le serveur SSH et installe ShellInABox, assure le démarrage du service et configure le firewall pour permettre le trafic sur le port 6175.
+
+### Résumé des Services et Ports
+
+- **Prometheus** : Port 9090
+- **Node Exporter** : Port 9100
+- **NoVNC** : Port 6082 pour les websockets
+- **ShellInABox** : Port 6175 (sécurisé via HTTPS)
+- **VNC Server** : Écoute typiquement sur les ports commençant par 5900 (ex. : 5902)
+
+Ces configurations garantissent une surveillance efficace et une maintenance à distance sécurisée de vos systèmes.
+
 ## TODO
 
 ### Collecte de données :
    - Permettre à Ansible de prendre en compte la variable de l'endpoint TimeScaleDB, qui est actuellement codée en dur.
    - Variabiliser le nom de la node afin de pouvoir les identifier une fois agrégées.
-
-
-
-
-
-
-
-Aide moi a faire un playbook ansible, tu mettra les fichier de configuration dans le dossier `files/` en utilisant copy pour les installer. le but de ce playbook est d' installer et de configurer shellinabox sur des machine debian11. le playbook utilisera localhost en hosts
-
-1- installation de openssl et shellinabox
-2- edition de /etc/default/shellinabox
-```
-# Should shellinaboxd start automatically
-SHELLINABOX_DAEMON_START=1
-
-# TCP port that shellinboxd's webserver listens on
-SHELLINABOX_PORT=6175
-
-# Parameters that are managed by the system and usually should not need
-# changing:
-# SHELLINABOX_DATADIR=/var/lib/shellinabox
-# SHELLINABOX_USER=shellinabox
-# SHELLINABOX_GROUP=shellinabox
-
-# Any optional arguments (e.g. extra service definitions).  Make sure
-# that that argument is quoted.
-#
-#   Beeps are disabled because of reports of the VLC plugin crashing
-#   Firefox on Linux/x86_64.
-SHELLINABOX_ARGS="--no-beep"
-
-# specify the IP address of an SSH server
-OPTS="-s /:SSH:192.168.0.140"
-
-```
-3- restart service
