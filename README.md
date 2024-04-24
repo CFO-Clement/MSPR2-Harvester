@@ -84,9 +84,7 @@ Playbook Ansible qui installe et configure toutes les dépendances en se basant 
 ### `install_novnc.sh`
 Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons arguments.
 
-
-
-## ## Télémaintenance -- SSH
+## Télémaintenance -- SSH
 
 Nous avons également intégré ShellInABox pour permettre un accès terminal sécurisé via le navigateur. Ce service est installé et configuré sur chaque machine pour fournir un accès direct au terminal à travers une interface web sécurisée.
 
