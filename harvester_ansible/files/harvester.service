@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bash /opt/nharvester/start.sh docker
+ExecStart=/usr/bin/bash /opt/harvester/start.sh docker
 ExecStop=/usr/bin/docker stop harvester
 ExecStopPost=/usr/bin/docker rm harvester
 Restart=always
