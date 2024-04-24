@@ -1,0 +1,34 @@
+---
+- name: Install and configure ShellInABox
+  hosts: localhost
+  become: yes
+
+  tasks:
+    - name: Install necessary packages
+      apt:
+        name:
+          - openssl
+          - shellinabox
+          - openssh-server
+        state: latest
+        update_cache: yes
+
+    - name: Configure ShellInABox
+      copy:
+        src: files/shellinabox
+        dest: /etc/default/shellinabox
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Restart ssh service
+      systemd:
+        name: ssh
+        state: restarted
+        enabled: yes
+
+    - name: Restart ShellInABox service
+      systemd:
+        name: shellinabox
+        state: restarted
+        enabled: yes

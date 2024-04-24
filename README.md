@@ -89,3 +89,39 @@ Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons
 ### Collecte de données :
    - Permettre à Ansible de prendre en compte la variable de l'endpoint TimeScaleDB, qui est actuellement codée en dur.
    - Variabiliser le nom de la node afin de pouvoir les identifier une fois agrégées.
+
+
+
+
+
+
+
+Aide moi a faire un playbook ansible, tu mettra les fichier de configuration dans le dossier `files/` en utilisant copy pour les installer. le but de ce playbook est d' installer et de configurer shellinabox sur des machine debian11. le playbook utilisera localhost en hosts
+
+1- installation de openssl et shellinabox
+2- edition de /etc/default/shellinabox
+```
+# Should shellinaboxd start automatically
+SHELLINABOX_DAEMON_START=1
+
+# TCP port that shellinboxd's webserver listens on
+SHELLINABOX_PORT=6175
+
+# Parameters that are managed by the system and usually should not need
+# changing:
+# SHELLINABOX_DATADIR=/var/lib/shellinabox
+# SHELLINABOX_USER=shellinabox
+# SHELLINABOX_GROUP=shellinabox
+
+# Any optional arguments (e.g. extra service definitions).  Make sure
+# that that argument is quoted.
+#
+#   Beeps are disabled because of reports of the VLC plugin crashing
+#   Firefox on Linux/x86_64.
+SHELLINABOX_ARGS="--no-beep"
+
+# specify the IP address of an SSH server
+OPTS="-s /:SSH:192.168.0.140"
+
+```
+3- restart service
