@@ -123,3 +123,6 @@ Ces configurations garantissent une surveillance efficace et une maintenance à 
 ### Collecte de données :
    - Permettre à Ansible de prendre en compte la variable de l'endpoint TimeScaleDB, qui est actuellement codée en dur.
    - Variabiliser le nom de la node afin de pouvoir les identifier une fois agrégées.
+
+### Harvester :
+  - Variabilier le fichier config pour le port et le endpoint du nester

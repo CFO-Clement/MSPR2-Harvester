@@ -1,0 +1,6 @@
+psutil==5.9.4
+python-nmap
+colorama
+requests
+python-dotenv
+tk

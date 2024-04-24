@@ -1,0 +1,14 @@
+[Unit]
+Description=Harvester Flask webapp
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash /opt/nharvester/start.sh docker
+ExecStop=/usr/bin/docker stop harvester
+ExecStopPost=/usr/bin/docker rm harvester
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

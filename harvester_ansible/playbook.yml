@@ -1,0 +1,51 @@
+---
+- name: Installation et configuration de l'environnement Docker avec une application Flask
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Installation de Python3
+      apt:
+        name: python3
+        state: present
+
+    - name: Installation de Docker
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Copie des fichiers de l'application
+      copy:
+        src: ./files/app/
+        dest: /opt/harvester/
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Construction de l'image Docker
+      command: >
+        docker build
+        -t harverster_image .
+      args:
+        chdir: /opt/harvester/
+
+    - name: Copie du fichier service systemd pour Harvester
+      copy:
+        src: ./files/harvester.service
+        dest: /etc/systemd/system/harvester.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Rechargement des fichiers de configuration systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Activation et démarrage du service Harvester
+      systemd:
+        name: harvester.service
+        enabled: yes
+        state: started
