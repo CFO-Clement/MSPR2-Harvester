@@ -108,6 +108,34 @@ Playbook Ansible qui prépare le serveur SSH et installe ShellInABox, assure le 
 ### `install_shellinabox.sh`
 Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons arguments.
 
+
+### Connection au Harvester
+Cette partie hérite directement de la MSPR1. Le projet Seahawks_Harvester consiste en un serveur reverse TCP qui ce connecte au Nester lui permetant de faire remonter des info et de pouvoir etre controler par le Nester
+```plaintext
+harvester_ansible/
+│
+├── files/
+│   ├── app/
+│       ├── config.env          # Variables d'environnement
+│       ├── DockerFile          # Dockerfile du projet Seahawks Harvester
+│       ├── install.sh          # Script d'installation du Harvester (configuration des vars, docker build...)
+│       ├── requirements.txt    # Dépendances Python
+│       ├── start.sh            # Script de lancement du projet
+│       ├── update.sh           # Script de mise à jour du projet
+│       ├── src/                # Application Flask 
+│   └── harvester.service          # Daemon pour lancer Harvester
+├── playbook.yml                # Playbook Ansible
+└── install_harvester.sh           # Script d'installation
+```
+#### `harvester_ansible/files/harvester.service`
+Daemon qui lance, après le démarrage du réseau, le script `start.sh` dans `/opt/harvester` avec les paramètres Docker.
+
+#### `harvester_ansible/playbook.yml`
+Ce playbook installe les dépendances, copie le projet Seahawks harvester dans `/opt/harvester`, construit l'image, crée le daemon et lance le service.
+
+#### `install_harvester.sh`
+Script qui installe Ansible si nécessaire, puis lance le playbook.
+
 ## Résumé des Services et Ports
 
 - **Prometheus** : Port 9090
@@ -115,8 +143,10 @@ Script qui installe Ansible si nécessaire, puis lance le playbook avec les bons
 - **NoVNC** : Port 6082 pour les websockets
 - **ShellInABox** : Port 6175 (sécurisé via HTTPS)
 - **VNC Server** : Écoute typiquement sur les ports commençant par 5900 (ex. : 5902)
+- **Harvester** : Port 5000
 
 Ces configurations garantissent une surveillance efficace et une maintenance à distance sécurisée de vos systèmes.
+
 
 ## TODO
 

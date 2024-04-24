@@ -2,6 +2,7 @@ import os
 import threading
 
 from dotenv import load_dotenv
+from time import sleep
 
 from ihm import SystemMetricsDashboard
 from logger import Log
@@ -37,7 +38,10 @@ if __name__ == '__main__':
     log.info("Connecting to TCP server")
     client.start()
 
-    log.info("Starting dashboard app")
-    app = SystemMetricsDashboard()
-    app.start_dashboard(stop_event)
-    app.mainloop()
+    while True:
+        sleep(60)
+
+    #log.info("Starting dashboard app")
+    #app = SystemMetricsDashboard()
+    #app.start_dashboard(stop_event)
+    #app.mainloop()
